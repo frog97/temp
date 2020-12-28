@@ -1,14 +1,14 @@
 pipeline {
     // 스테이지 별로 다른 거
-    agent any
+    agent any // 아무 slave나 
 
     triggers {
-        pollSCM('*/3 * * * *')
+        pollSCM('*/3 * * * *') //3분주기. cron 문법
     }
 
     environment {
-      AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId')
-      AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey')
+      AWS_ACCESS_KEY_ID = credentials('awsAccessKeyId') // AWS에 대한 환경 변수 등록. IAM에서 받아 오는 것.
+      AWS_SECRET_ACCESS_KEY = credentials('awsSecretAccessKey') 
       AWS_DEFAULT_REGION = 'ap-northeast-2'
       HOME = '.' // Avoid npm root owned
     }
@@ -21,9 +21,9 @@ pipeline {
             steps {
                 echo 'Clonning Repository'
 
-                git url: 'https://github.com/frontalnh/temp.git',
+                git url: 'https://github.com/frog97/temp.git',
                     branch: 'master',
-                    credentialsId: 'jenkinsgit'
+                    credentialsId: 'frog97'
             }
 
             post {
@@ -50,7 +50,7 @@ pipeline {
             // 프론트엔드 디렉토리의 정적파일들을 S3 에 올림, 이 전에 반드시 EC2 instance profile 을 등록해야함.
             dir ('./website'){
                 sh '''
-                aws s3 sync ./ s3://namhoontest
+                aws s3 sync ./ s3://testhhyoontest
                 '''
             }
           }
@@ -61,7 +61,7 @@ pipeline {
               success {
                   echo 'Successfully Cloned Repository'
 
-                  mail  to: 'frontalnh@gmail.com',
+                  mail  to: 'frog97@gmail.com',
                         subject: "Deploy Frontend Success",
                         body: "Successfully deployed frontend!"
 
@@ -70,7 +70,7 @@ pipeline {
               failure {
                   echo 'I failed :('
 
-                  mail  to: 'frontalnh@gmail.com',
+                  mail  to: 'frog97@gmail.com',
                         subject: "Failed Pipelinee",
                         body: "Something is wrong with deploy frontend"
               }
@@ -139,8 +139,7 @@ pipeline {
             echo 'Build Backend'
 
             dir ('./server'){
-                sh '''
-                docker rm -f $(docker ps -aq)
+                sh '''                
                 docker run -p 80:80 -d server
                 '''
             }
@@ -148,7 +147,7 @@ pipeline {
 
           post {
             success {
-              mail  to: 'frontalnh@gmail.com',
+              mail  to: 'frog97@gmail.com',
                     subject: "Deploy Success",
                     body: "Successfully deployed!"
                   
